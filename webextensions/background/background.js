@@ -179,6 +179,10 @@ async function saveTreeStructure(aWindowId) {
     kWINDOW_STATE_TREE_STRUCTURE,
     structure
   );
+
+  var lastSession = configs.lastSession;
+  lastSession[aWindowId] = structure;
+  configs.lastSession = lastSession;
 }
 
 async function loadTreeStructure() {
@@ -186,6 +190,22 @@ async function loadTreeStructure() {
   var windows = await browser.windows.getAll({
     windowTypes: ['normal']
   });
+
+  // startup page is home or blank, and waiting for "Restore Previous Session"
+  if (windows.length == 1) {
+    let allNormalTabs = getNormalTabs(windows[0].id);
+    let lastSession = configs.lastSession;
+    let windowIds = Object.keys(lastSession);
+    log('lastSession ', lastSession);
+    if (allNormalTabs.length == 1 &&
+        (windowIds.length > 1 ||
+         (lastSession[windowIds[0]] &&
+          lastSession[windowIds[0]].length > 1))) {
+      waitWindowRestored(allNormalTabs[0]);
+      return;
+    }
+  }
+
   return Promise.all(windows.map(async aWindow => {
     var structure = await browser.sessions.getWindowValue(
       aWindow.id,
@@ -294,6 +314,7 @@ async function attachTabFromRestoredInfo(aTab, aOptions = {}) {
 
 
 function waitWindowRestored(aRestorerTab) {
+  log('waitWindowRestored: ', dumpTab(aRestorerTab));
   var container = getTabsContainer(aRestorerTab);
   var promisedRestored = new Promise((aResolve, aReject) => {
     container.onWindowRestored = aResolve;
@@ -301,6 +322,13 @@ function waitWindowRestored(aRestorerTab) {
   promisedRestored.then(async () => {
     var restoringTabs = container.restoringTabs;
     container.restoringTabs = [];
+    var uniqueIds = await Promise.all(restoringTabs.map(aTab => aTab.uniqueId));
+    if (uniqueIds.every(aUniqueId => !aUniqueId.restored)) {
+      log('waitWindowRestored: not restorind, retry');
+      waitWindowRestored(aRestorerTab)
+      return;
+    }
+
     log('waitWindowRestored: Start to restore tree for tabs: ', restoringTabs);
 
     // Because about:sessionrestore tab is reused, we need to re-init

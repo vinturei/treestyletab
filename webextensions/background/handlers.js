@@ -717,6 +717,12 @@ function onTabPinned(aTab) {
   collapseExpandTabAndSubtree(aTab, { collapsed: false });
 }
 
+function onWindowClosed(aWindowId) {
+  var lastSession = configs.lastSession;
+  delete lastSession[aWindowId];
+  configs.lastSession = lastSession;
+}
+
 
 /* message observer */
 
