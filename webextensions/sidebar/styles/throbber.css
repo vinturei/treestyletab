@@ -24,7 +24,16 @@
   100% { transform: translateX(-100%); }
 }
 
+:root:not(.blocking-throbber) #blocking-screen .throbber,
+.tab:not(.loading) .throbber,
+.tab:not(.loading) .throbber::before,
+.tab.collapsed .throbber {
+  display: none !important;
+}
+
+
 #master-throbber-container,
+.master-colored-throbber,
 .throbber {
   display: inline-block;
   font-size: var(--throbber-size);
@@ -37,12 +46,11 @@
   padding: 0;
   pointer-events: none;
   position: relative;
-  transform: var(--throbber-scale);
   width: var(--throbber-size);
 }
 
 #master-throbber,
-.throbber::before {
+.master-colored-throbber::before {
   content: "";
   position: absolute;
   width: calc(var(--throbber-size) * 60);
@@ -55,7 +63,7 @@
   background-repeat: no-repeat;
 }
 
-.tab:not(.collapsed) .throbber::before,
+.master-colored-throbber::before,
 :root.blocking-throbber #blocking-screen .throbber {
   background: var(--throbber-color);
   box-shadow: 0 0 2px var(--throbber-shadow-color);
@@ -64,16 +72,28 @@
   mask-repeat: no-repeat;
 }
 
-:root:not(.blocking-throbber) #blocking-screen .throbber,
-.tab:not(.loading) .throbber,
-.tab.collapsed .throbber {
-  display: none !important;
-}
-
 :root.have-loading-tab #master-throbber,
 :root.blocking-throbber #master-throbber {
   animation: throbber 1.05s steps(60) infinite;
 }
+
+
+.tab:not(.collapsed).loading .throbber {
+  transform: var(--throbber-scale);
+}
+
+.tab:not(.collapsed).loading .throbber::before {
+  background: -moz-element(#master-throbber-inactive);
+  content: "";
+  position: absolute;
+  width: var(--throbber-size);
+  height: var(--throbber-size);
+}
+
+.tab:not(.collapsed).loading.active .throbber::before {
+  background: -moz-element(#master-throbber-active);
+}
+
 
 :root.blocking-throbber #blocking-screen .throbber {
   position: absolute;
