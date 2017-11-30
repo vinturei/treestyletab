@@ -280,15 +280,84 @@ async function loadTreeStructure() {
 }
 
 function reserveToAttachTabFromRestoredInfo(aTab, aOptions = {}) {
+  gMetricsData.add('reserveToAttachTabFromRestoredInfo');
   if (reserveToAttachTabFromRestoredInfo.waiting)
     clearTimeout(reserveToAttachTabFromRestoredInfo.waiting);
   reserveToAttachTabFromRestoredInfo.tasks.push({ tab: aTab, options: aOptions });
   reserveToAttachTabFromRestoredInfo.waiting = setTimeout(async () => {
+    gMetricsData.add('reserveToAttachTabFromRestoredInfo: timeout, start restoration');
     reserveToAttachTabFromRestoredInfo.waiting = null;
     var tasks = reserveToAttachTabFromRestoredInfo.tasks.slice(0);
     reserveToAttachTabFromRestoredInfo.tasks = [];
     var uniqueIds = await Promise.all(tasks.map(aTask => aTask.tab.uniqueId));
+    gMetricsData.add('reserveToAttachTabFromRestoredInfo: uniqueIds');
     var bulk = tasks.length > 1;
+    if (bulk) {
+      browser.runtime.sendMessage({
+        type:   kCOMMAND_NOTIFY_TAB_RESTORING,
+        tab:    tasks[0].tab.apiTab.id,
+        window: tasks[0].tab.apiTab.windowId
+      });
+
+      let persistentRelations = await Promise.all(tasks.map(async (aTask, aIndex) => {
+        var tab = aTask.tab;
+        var ancestors, children, collapsed;
+        [ancestors, children, collapsed] = await Promise.all([
+          browser.sessions.getTabValue(tab.apiTab.id, kPERSISTENT_ANCESTORS),
+          browser.sessions.getTabValue(tab.apiTab.id, kPERSISTENT_CHILDREN),
+          browser.sessions.getTabValue(tab.apiTab.id, kPERSISTENT_SUBTREE_COLLAPSED)
+        ]);
+        return {
+          id:        uniqueIds[aIndex].id,
+          ancestors: ancestors || [],
+          children:  children  || [],
+          collapsed
+        };
+      }));
+      gMetricsData.add('reserveToAttachTabFromRestoredInfo: persistentRelations');
+
+      let treeStructure = [];
+      let currentTree = [];
+      let tabs = persistentRelations.slice(0).reverse();
+      let tabsById = {};
+      for (let tab of tabs) {
+        tabsById[tab.id] = tab;
+        for (let child of tab.children) {
+          child = tabsById[child];
+          if (child && child.ancestors.length == 0)
+            child.ancestors.push(tab.id);
+        }
+      }
+      for (let tab of persistentRelations) {
+        let item = {
+          parent:    -1,
+          collapsed: tab.collapsed
+        };
+        for (let ancestor of tab.ancestors) {
+          item.parent = currentTree.indexOf(ancestor);
+          if (item.parent > -1)
+            break;
+        }
+        treeStructure.push(item);
+        if (item.parent < 0)
+          currentTree = [];
+        currentTree.push(tab.id);
+      }
+      gMetricsData.add('reserveToAttachTabFromRestoredInfo: treeStructure');
+
+      applyTreeStructureToTabs(tasks.map(aTask => aTask.tab), treeStructure, { broadcast: true });
+      gMetricsData.add('reserveToAttachTabFromRestoredInfo: applied');
+      console.log(gMetricsData.toString());
+      console.log(JSON.stringify(treeStructure));
+
+      browser.runtime.sendMessage({
+        type:   kCOMMAND_NOTIFY_TAB_RESTORED,
+        tab:    tasks[0].tab.apiTab.id,
+        window: tasks[0].tab.apiTab.windowId
+      });
+      return;
+    }
+
     uniqueIds.forEach((aUniqueId, aIndex) => {
       var task = tasks[aIndex];
       attachTabFromRestoredInfo(task.tab, clone(task.options, {
@@ -344,6 +413,7 @@ async function attachTabFromRestoredInfo(aTab, aOptions = {}) {
     let done = attachTabTo(aTab, ancestor, {
       insertBefore,
       insertAfter,
+      justNow:     aOptions.bulk,
       dontExpand:  !active,
       forceExpand: active,
       broadcast:   true
@@ -359,6 +429,7 @@ async function attachTabFromRestoredInfo(aTab, aOptions = {}) {
       configs.syncParentTabAndOpenerTab) {
     log(' attach to opener: ', { child: dumpTab(aTab), parent: dumpTab(opener) });
     let done = attachTabTo(aTab, opener, {
+      justNow:     aOptions.bulk,
       dontExpand:  !active,
       forceExpand: active,
       broadcast:   true,
@@ -375,6 +446,7 @@ async function attachTabFromRestoredInfo(aTab, aOptions = {}) {
       // when not in-middle position of existing tree (safely detachable position)
       !getNextSiblingTab(aTab)) {
     detachTab(aTab, {
+      justNow:   aOptions.bulk,
       broadcast: true
     });
   }
@@ -392,6 +464,7 @@ async function attachTabFromRestoredInfo(aTab, aOptions = {}) {
   }
   if (aOptions.canCollapse || aOptions.bulk) {
     collapseExpandSubtree(aTab, {
+      justNow:   aOptions.bulk,
       broadcast: true,
       collapsed
     });

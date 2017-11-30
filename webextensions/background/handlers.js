@@ -23,7 +23,8 @@ function onToolbarButtonClick(aTab) {
 
 // this should return true if the tab is moved while processing
 function onTabOpening(aTab, aInfo = {}) {
-  if (aInfo.duplicatedInternally)
+  if (aInfo.duplicatedInternally ||
+      reserveToAttachTabFromRestoredInfo.tasks.length > 1)
     return false;
 
   log('onTabOpening ', dumpTab(aTab), aInfo);
@@ -156,6 +157,8 @@ async function tryGroupTabs(aTabIds) {
 }
 
 function onTabOpened(aTab, aInfo = {}) {
+  if (reserveToAttachTabFromRestoredInfo.tasks.length > 1)
+    return;
   log('onTabOpened ', dumpTab(aTab), aInfo);
   if (aInfo.duplicated) {
     let original = aInfo.originalTab;
@@ -354,6 +357,8 @@ async function onTabMoved(aTab, aMoveInfo) {
 }
 
 async function tryFixupTreeForInsertedTab(aTab, aMoveInfo) {
+  if (reserveToAttachTabFromRestoredInfo.tasks.length > 1)
+    return;
   if (!shouldApplyTreeBehavior(aMoveInfo)) {
     detachAllChildren(aTab, {
       behavior: getCloseParentBehaviorForTab(aTab, {
