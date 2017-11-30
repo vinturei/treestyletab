@@ -209,7 +209,7 @@ async function onNewTabTracked(aTab) {
   });
 
   // tabs can be removed and detached while waiting, so cache them here for `detectTabActionFromNewPosition()`.
-  var treeForActionDetection = snapshotTreeForActionDetection(newTab);
+//  var treeForActionDetection = snapshotTreeForActionDetection(newTab);
 
   var openedWithPosition   = container.toBeOpenedTabsWithPositions > 0;
   var duplicatedInternally = container.duplicatingTabsCount > 0;
@@ -252,7 +252,7 @@ async function onNewTabTracked(aTab) {
     duplicated,
     duplicatedInternally,
     originalTab: duplicated && getTabById({ tab: uniqueId.originalTabId }),
-    treeForActionDetection
+//    treeForActionDetection
   });
   wait(configs.newTabAnimationDuration).then(() => {
     newTab.classList.remove(kTAB_STATE_OPENING);
