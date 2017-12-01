@@ -14,6 +14,7 @@
 
 var tabContextMenu = {
   init() {
+    return;
     this.onBlur            = this.onBlur.bind(this);
     this.onMouseDown       = this.onMouseDown.bind(this);
     this.onClick           = this.onClick.bind(this);
@@ -91,8 +92,8 @@ var tabContextMenu = {
 
     var extraItemNodes = document.createDocumentFragment();
     for (let id of Object.keys(this.extraItems)) {
-      let addonItem = document.createElement('li');
-      addonItem.appendChild(document.createTextNode(this.getAddonName(id)));
+      let addonItem = document.createElement('menu');
+      addonItem.setAttribute('label', this.getAddonName(id));
       addonItem.classList.add('extra');
       this.prepareAsSubmenu(addonItem);
       let addonSubMenu = addonItem.lastChild;
@@ -129,9 +130,8 @@ var tabContextMenu = {
     if (!extraItemNodes.hasChildNodes())
       return;
 
-    var separator = document.createElement('li');
+    var separator = document.createElement('hr');
     separator.classList.add('extra');
-    separator.classList.add('separator');
     extraItemNodes.insertBefore(separator, extraItemNodes.firstChild);
     this.menu.appendChild(extraItemNodes);
   },
@@ -150,6 +150,7 @@ var tabContextMenu = {
   buildExtraItem(aItem, aOwnerId) {
     var itemNode = document.createElement('li');
     itemNode.setAttribute('id', `${aOwnerId}-${aItem.id}`);
+    itemNode.setAttribute('type', 'command');
     itemNode.setAttribute('data-item-id', aItem.id);
     itemNode.setAttribute('data-item-owner-id', aOwnerId);
     itemNode.classList.add('extra');

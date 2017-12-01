@@ -37,7 +37,7 @@
     <style id="browser-theme-definition" type="text/css"></style>
     <style id="user-style-rules" type="text/css"></style>
   </head>
-  <body>
+  <body contextmenu="tabContextMenu">
     <div id="tabbar" class="vbox">
       <div id="all-tabs">
       </div>
@@ -83,36 +83,62 @@
          I have very less motivation to maintain this for future versions.
          See also: https://bugzilla.mozilla.org/show_bug.cgi?id=1376251
                    https://bugzilla.mozilla.org/show_bug.cgi?id=1396031 -->
-    <ul id="tabContextMenu">
-      <li id="context_reloadTab" class="require-context-tab"
-          title="__MSG_tabContextMenu.reload.label__">__MSG_tabContextMenu.reload.label__</li>
-      <li id="context_toggleMuteTab-mute" class="require-context-tab"
-          title="__MSG_tabContextMenu.mute.label__">__MSG_tabContextMenu.mute.label__</li>
-      <li id="context_toggleMuteTab-unmute" class="require-context-tab"
-          title="__MSG_tabContextMenu.unmute.label__">__MSG_tabContextMenu.unmute.label__</li>
-      <li class="separator require-context-tab"></li>
-      <li id="context_pinTab" class="require-context-tab"
-          title="__MSG_tabContextMenu.pin.label__">__MSG_tabContextMenu.pin.label__</li>
-      <li id="context_unpinTab" class="require-context-tab"
-          title="__MSG_tabContextMenu.unpin.label__">__MSG_tabContextMenu.unpin.label__</li>
-      <li id="context_duplicateTab" class="require-context-tab"
-          title="__MSG_tabContextMenu.duplicate.label__">__MSG_tabContextMenu.duplicate.label__</li>
-      <li id="context_openTabInWindow" class="require-context-tab require-multiple-tabs"
-          title="__MSG_tabContextMenu.tearOff.label__">__MSG_tabContextMenu.tearOff.label__</li>
-      <li class="separator require-context-tab"></li>
-      <li id="context_reloadAllTabs" class="require-multiple-tabs"
-          title="__MSG_tabContextMenu.reloadAll.label__">__MSG_tabContextMenu.reloadAll.label__</li>
-      <li id="context_bookmarkAllTabs" class="require-normal-tabs"
-          title="__MSG_tabContextMenu.bookmarkAll.label__">__MSG_tabContextMenu.bookmarkAll.label__</li>
-      <li id="context_closeTabsToTheEnd" class="require-context-tab require-multiple-normal-tabs"
-          title="__MSG_tabContextMenu.closeAfter.label__">__MSG_tabContextMenu.closeAfter.label__</li>
-      <li id="context_closeOtherTabs" class="require-context-tab require-multiple-normal-tabs"
-          title="__MSG_tabContextMenu.closeOther.label__">__MSG_tabContextMenu.closeOther.label__</li>
-      <li class="separator"></li>
-      <li id="context_undoCloseTab"
-          title="__MSG_tabContextMenu.undoClose.label__">__MSG_tabContextMenu.undoClose.label__</li>
-      <li id="context_closeTab" class="require-context-tab"
-          title="__MSG_tabContextMenu.close.label__">__MSG_tabContextMenu.close.label__</li>
-    </ul>
+    <menu id="tabContextMenu"
+          type="context">
+      <menuitem id="context_reloadTab"
+                type="command"
+                class="require-context-tab"
+                label="__MSG_tabContextMenu.reload.label__">
+      <menuitem id="context_toggleMuteTab-mute"
+                type="command"
+                class="require-context-tab"
+                label="__MSG_tabContextMenu.mute.label__">
+      <menuitem id="context_toggleMuteTab-unmute"
+                type="command"
+                class="require-context-tab"
+                label="__MSG_tabContextMenu.unmute.label__">
+      <hr class="require-context-tab">
+      <menuitem id="context_pinTab"
+                type="command"
+                class="require-context-tab"
+                label="__MSG_tabContextMenu.pin.label__">
+      <menuitem id="context_unpinTab"
+                type="command"
+                class="require-context-tab"
+                label="__MSG_tabContextMenu.unpin.label__">
+      <menuitem id="context_duplicateTab"
+                type="command"
+                class="require-context-tab"
+                label="__MSG_tabContextMenu.duplicate.label__">
+      <menuitem id="context_openTabInWindow"
+                type="command"
+                class="require-context-tab require-multiple-tabs"
+                label="__MSG_tabContextMenu.tearOff.label__">
+      <hr class="require-context-tab">
+      <menuitem id="context_reloadAllTabs"
+                type="command"
+                class="require-multiple-tabs"
+                label="__MSG_tabContextMenu.reloadAll.label__">
+      <menuitem id="context_bookmarkAllTabs"
+                type="command"
+                class="require-normal-tabs"
+                label="__MSG_tabContextMenu.bookmarkAll.label__">
+      <menuitem id="context_closeTabsToTheEnd"
+                type="command"
+                class="require-context-tab require-multiple-normal-tabs"
+                label="__MSG_tabContextMenu.closeAfter.label__">
+      <menuitem id="context_closeOtherTabs"
+                type="command"
+                class="require-context-tab require-multiple-normal-tabs"
+                label="__MSG_tabContextMenu.closeOther.label__">
+      <hr>
+      <menuitem id="context_undoCloseTab"
+                type="command" 
+                label="__MSG_tabContextMenu.undoClose.label__">
+      <menuitem id="context_closeTab"
+                type="command"
+                class="require-context-tab"
+                label="__MSG_tabContextMenu.close.label__">
+    </menu>
   </body>
 </html>

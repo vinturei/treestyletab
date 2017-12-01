@@ -178,6 +178,7 @@ function onResize(aEvent) {
 }
 
 function onContextMenu(aEvent) {
+    return;
   aEvent.stopPropagation();
   aEvent.preventDefault();
   var tab = getTabFromEvent(aEvent);
