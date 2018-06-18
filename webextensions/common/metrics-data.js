@@ -11,32 +11,32 @@ const gInitialTime = now;
 let gLastTime    = now;
 let gDeltaBetweenLastItem = 0;
 
-export function add(aLabel) {
+export function add(label) {
   const now = Date.now();
   gItems.push({
-    label: aLabel,
+    label: label,
     delta: now - gLastTime
   });
   gDeltaBetweenLastItem = now - gInitialTime;
   gLastTime = now;
 }
 
-export async function addAsync(aLabel, aAsyncTask) {
+export async function addAsync(label, asyncTask) {
   const start = Date.now();
-  if (typeof aAsyncTask == 'function')
-    aAsyncTask = aAsyncTask();
-  return aAsyncTask.then(aResult => {
+  if (typeof asyncTask == 'function')
+    asyncTask = asyncTask();
+  return asyncTask.then(result => {
     gItems.push({
-      label: `(async) ${aLabel}`,
+      label: `(async) ${label}`,
       delta: Date.now() - start,
       async: true
     });
-    return aResult;
+    return result;
   });
 }
 
 export function toString() {
-  const logs = gItems.map(aItem => `${aItem.delta || 0}: ${aItem.label}`);
+  const logs = gItems.map(item => `${item.delta || 0}: ${item.label}`);
   return `total ${gDeltaBetweenLastItem} msec\n${logs.join('\n')}`;
 }
 
