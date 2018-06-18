@@ -4,21 +4,21 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-const gItems = [];
+const mItems = [];
 
 const now = Date.now();
-const gInitialTime = now;
-let gLastTime    = now;
-let gDeltaBetweenLastItem = 0;
+const mInitialTime = now;
+let mLastTime    = now;
+let mDeltaBetweenLastItem = 0;
 
 export function add(label) {
   const now = Date.now();
-  gItems.push({
+  mItems.push({
     label: label,
-    delta: now - gLastTime
+    delta: now - mLastTime
   });
-  gDeltaBetweenLastItem = now - gInitialTime;
-  gLastTime = now;
+  mDeltaBetweenLastItem = now - mInitialTime;
+  mLastTime = now;
 }
 
 export async function addAsync(label, asyncTask) {
@@ -26,7 +26,7 @@ export async function addAsync(label, asyncTask) {
   if (typeof asyncTask == 'function')
     asyncTask = asyncTask();
   return asyncTask.then(result => {
-    gItems.push({
+    mItems.push({
       label: `(async) ${label}`,
       delta: Date.now() - start,
       async: true
@@ -36,7 +36,7 @@ export async function addAsync(label, asyncTask) {
 }
 
 export function toString() {
-  const logs = gItems.map(item => `${item.delta || 0}: ${item.label}`);
-  return `total ${gDeltaBetweenLastItem} msec\n${logs.join('\n')}`;
+  const logs = mItems.map(item => `${item.delta || 0}: ${item.label}`);
+  return `total ${mDeltaBetweenLastItem} msec\n${logs.join('\n')}`;
 }
 

@@ -36,20 +36,20 @@ export function init() {
   }, { once: true });
 }
 
-const gExtraItems = new Map();
+const mExtraItems = new Map();
 
 function getItemsFor(addonId) {
-  if (gExtraItems.has(addonId)) {
-    return gExtraItems.get(addonId);
+  if (mExtraItems.has(addonId)) {
+    return mExtraItems.get(addonId);
   }
   const items = [];
-  gExtraItems.set(addonId, items);
+  mExtraItems.set(addonId, items);
   return items;
 }
 
 function exportExtraItems() {
   const exported = {};
-  for (const [id, items] of gExtraItems.entries()) {
+  for (const [id, items] of mExtraItems.entries()) {
     exported[id] = items;
   }
   return exported;
@@ -62,19 +62,19 @@ async function notifyUpdated() {
   });
 }
 
-let gReservedNotifyUpdate;
-let gNotifyUpdatedHandlers = [];
+let mReservedNotifyUpdate;
+let mNotifyUpdatedHandlers = [];
 
 function reserveNotifyUpdated() {
   return new Promise((resolve, _aReject) => {
-    gNotifyUpdatedHandlers.push(resolve);
-    if (gReservedNotifyUpdate)
-      clearTimeout(gReservedNotifyUpdate);
-    gReservedNotifyUpdate = setTimeout(async () => {
-      gReservedNotifyUpdate = undefined;
+    mNotifyUpdatedHandlers.push(resolve);
+    if (mReservedNotifyUpdate)
+      clearTimeout(mReservedNotifyUpdate);
+    mReservedNotifyUpdate = setTimeout(async () => {
+      mReservedNotifyUpdate = undefined;
       await notifyUpdated();
-      const handlers = gNotifyUpdatedHandlers;
-      gNotifyUpdatedHandlers = [];
+      const handlers = mNotifyUpdatedHandlers;
+      mNotifyUpdatedHandlers = [];
       for (const handler of handlers) {
         handler();
       }
@@ -115,7 +115,7 @@ export function onExternalMessage(message, sender) {
       }
       if (shouldAdd)
         items.push(params);
-      gExtraItems.set(sender.id, items);
+      mExtraItems.set(sender.id, items);
       return reserveNotifyUpdated();
     }; break;
 
@@ -128,7 +128,7 @@ export function onExternalMessage(message, sender) {
         items.splice(i, 1, Object.assign({}, item, message.params[1]));
         break;
       }
-      gExtraItems.set(sender.id, items);
+      mExtraItems.set(sender.id, items);
       return reserveNotifyUpdated();
     }; break;
 
@@ -138,13 +138,13 @@ export function onExternalMessage(message, sender) {
       if (Array.isArray(id))
         id = id[0];
       items = items.filter(item => item.id != id);
-      gExtraItems.set(sender.id, items);
+      mExtraItems.set(sender.id, items);
       return reserveNotifyUpdated();
     }; break;
 
     case TSTAPI.kCONTEXT_MENU_REMOVE_ALL:
     case TSTAPI.kUNREGISTER_SELF: {
-      delete gExtraItems.delete(sender.id);
+      delete mExtraItems.delete(sender.id);
       return reserveNotifyUpdated();
     }; break;
   }

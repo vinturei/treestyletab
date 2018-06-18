@@ -24,8 +24,8 @@ function log(...args) {
 }
 
 
-let gTabSwitchedByShortcut       = false;
-let gMaybeTabSwitchingByShortcut = false;
+let mTabSwitchedByShortcut       = false;
+let mMaybeTabSwitchingByShortcut = false;
 
 
 Tabs.onActivating.addListener((tab, info = {}) => { // return true if this focusing is overridden.
@@ -38,10 +38,10 @@ Tabs.onActivating.addListener((tab, info = {}) => { // return true if this focus
   cancelDelayedExpand(Tabs.getTabById(container.lastFocusedTab));
   const shouldSkipCollapsed = (
     !info.byInternalOperation &&
-    gMaybeTabSwitchingByShortcut &&
+    mMaybeTabSwitchingByShortcut &&
     configs.skipCollapsedTabsForTabSwitchingShortcuts
   );
-  gTabSwitchedByShortcut = gMaybeTabSwitchingByShortcut;
+  mTabSwitchedByShortcut = mMaybeTabSwitchingByShortcut;
   if (Tabs.isCollapsed(tab)) {
     if (!Tabs.getParentTab(tab)) {
       // This is invalid case, generally never should happen,
@@ -75,7 +75,7 @@ Tabs.onActivating.addListener((tab, info = {}) => { // return true if this focus
         newSelection = Tabs.getNextVisibleTab(newSelection) || Tabs.getFirstVisibleTab(tab);
       }
       container.lastFocusedTab = newSelection.id;
-      if (gMaybeTabSwitchingByShortcut)
+      if (mMaybeTabSwitchingByShortcut)
         setupDelayedExpand(newSelection);
       TabsInternalOperation.selectTab(newSelection, { silently: true });
       log('Tabs.onActivating: discarded? ', dumpTab(tab), Tabs.isDiscarded(tab));
@@ -97,7 +97,7 @@ Tabs.onActivating.addListener((tab, info = {}) => { // return true if this focus
     handleNewActiveTab(tab, info);
   }
   container.lastFocusedTab = tab.id;
-  if (gMaybeTabSwitchingByShortcut)
+  if (mMaybeTabSwitchingByShortcut)
     setupDelayedExpand(tab);
   Background.tryInitGroupTab(tab);
   return true;
@@ -160,7 +160,7 @@ Tabs.onCollapsedStateChanged.addListener((tab, info = {}) => {
 
 Background.onInit.addListener(() => {
   browser.windows.onFocusChanged.addListener(() => {
-    gMaybeTabSwitchingByShortcut = false;
+    mMaybeTabSwitchingByShortcut = false;
   });
 });
 
@@ -177,18 +177,18 @@ function onMessage(message, sender) {
   //log('onMessage: ', message, sender);
   switch (message.type) {
     case Constants.kNOTIFY_TAB_MOUSEDOWN:
-      gMaybeTabSwitchingByShortcut =
-        gTabSwitchedByShortcut = false;
+      mMaybeTabSwitchingByShortcut =
+        mTabSwitchedByShortcut = false;
       break;
 
     case Constants.kCOMMAND_NOTIFY_START_TAB_SWITCH:
       log('Constants.kCOMMAND_NOTIFY_START_TAB_SWITCH');
-      gMaybeTabSwitchingByShortcut = true;
+      mMaybeTabSwitchingByShortcut = true;
       break;
     case Constants.kCOMMAND_NOTIFY_END_TAB_SWITCH:
       log('Constants.kCOMMAND_NOTIFY_END_TAB_SWITCH');
       return (async () => {
-        if (gTabSwitchedByShortcut &&
+        if (mTabSwitchedByShortcut &&
             configs.skipCollapsedTabsForTabSwitchingShortcuts) {
           await Tabs.waitUntilTabsAreCreated(sender.tab);
           let tab = sender.tab && Tabs.getTabById(sender.tab);
@@ -207,8 +207,8 @@ function onMessage(message, sender) {
             });
           }
         }
-        gMaybeTabSwitchingByShortcut =
-          gTabSwitchedByShortcut = false;
+        mMaybeTabSwitchingByShortcut =
+          mTabSwitchedByShortcut = false;
       })();
   }
 }
