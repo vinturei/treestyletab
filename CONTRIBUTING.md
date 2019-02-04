@@ -30,7 +30,7 @@ Here is a list of typical questions I asked to existing reports:
    Sometimes I got an issue including multiple topics, but such an issue is hard to be closed, then it often stays opened for long time and confuses me.
    If you have multiple topics, please report them as separate issues for each.
 
-For future requests, some more important information:
+For feature requests, some more important information:
 
  * **Did you find other addon which provide the feature you are going to request?**
    If there is any other addon for the purpose, then TST should become compatible to it instead of merging the feature into TST itself.
